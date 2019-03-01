@@ -1,0 +1,125 @@
+######### Download Spark 2.4.0
+
+Java 1.8 (newer version won't work)
+https://spark.apache.org/downloads.html
+
+Use default selection:
+Spark release 2.4.0
+
+choose defauult package type:
+pre-built for Apache Hadoop 2.7 and Later
+
+click "spark-2.4.0-bin-hadoop-2.7.tgz
+
+
+######### You can read these books for free during 2-week trial period
+
+book 1:
+https://learning.oreilly.com/library/view/advanced-analytics-with/9781491972946/ch02.html#idm140398904770752
+
+book 2:
+https://learning.oreilly.com/library/view/spark-the-definitive/9781491912201/ch04.html
+
+######### Basic commands:
+
+
+
+Step 1:
+
+Read the files
+
+cd /Users/jenny/Downloads/spark-2.4.0-bin-hadoop2.7
+
+./bin/spark-shell
+For python:
+./bin/pyspark
+
+val donotcall = sc.textFile("/Users/jenny/Downloads/SparkExercise/donotcall.txt")
+
+val transactions = sc.textFile("/Users/jenny/Downloads/SparkExercise/transactions.txt")
+
+val users = sc.textFile("/Users/jenny/Downloads/SparkExercise/users.txt")
+
+
+
+Step 2:
+
+transactions.count
+
+transactions.first
+
+transactions.take(3)  ← array
+
+
+
+Step 3:
+
+val transact1 = transactions.sample(true, 0.0001, 5) ← (withReplace, fraction, seed)
+
+
+transact1.count
+
+transact1.collect  ← array (always call .count first to avoid collecting a huge RDD)
+
+transact1.collect.foreach(println)
+
+
+Step 4: filter
+
+transact1.filter(line => line.contains("2014-02-17"))
+
+
+Step 5: map
+
+case class Transact(customer_id:String, amount:String, date:String)
+
+val transactRDD = transact1.map(l => {
+
+         val transactArray = l.split(";")
+
+         Transact(transactArray(0), transactArray(1), transactArray(2))
+
+})
+
+transactRDD.count
+
+transactRDD.collect.foreach(println)
+
+
+
+
+
+Step 6: reduceByKey
+
+
+// use “customer_id” as the key
+
+val transactionsRDD = transactions.map(l => {
+
+         val transactArray = l.split(";")
+
+         (transactArray(0), transactArray(1))
+
+})
+
+val consolidated = transactionsRDD.reduceByKey((total, value) => total + value)
+
+consolidated.count
+
+
+
+// use “date” as the key
+
+val transactionsRDD = transactions.map(l => {
+
+         val transactArray = l.split(";")
+
+         (transactArray(2), transactArray(1))
+
+})
+
+val consolidated = transactionsRDD.reduceByKey((total, value) => total + value)
+
+consolidated.count
+
+
